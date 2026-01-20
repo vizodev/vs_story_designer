@@ -1,174 +1,143 @@
-// import 'dart:async';
-// import 'dart:io';
-// import 'dart:typed_data';
+import 'dart:async';
+import 'dart:io';
+import 'dart:typed_data';
+import 'dart:ui' as ui;
 
-// import 'package:flutter/material.dart';
-// import 'package:flutter/rendering.dart';
-// import 'package:flutter/scheduler.dart';
-// import 'package:path_provider/path_provider.dart';
-// import 'package:vs_story_designer/src/domain/providers/FfmpegProvider.dart';
-// import 'package:vs_story_designer/src/domain/providers/notifiers/control_provider.dart';
-// import 'package:vs_story_designer/src/domain/providers/notifiers/rendering_notifier.dart';
-// import 'dart:ui' as ui show Image, ImageByteFormat;
+import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:vs_story_designer/src/domain/providers/FfmpegProvider.dart';
+import 'package:vs_story_designer/src/domain/providers/notifiers/control_provider.dart';
+import 'package:vs_story_designer/src/domain/providers/notifiers/rendering_notifier.dart';
+import 'package:vs_story_designer/src/presentation/utils/constants/render_state.dart';
 
-// import 'package:vs_story_designer/src/presentation/utils/constants/render_state.dart';
+class WidgetRecorderController extends ChangeNotifier {
+  WidgetRecorderController() : _containerKey = GlobalKey();
 
-// class WidgetRecorderController extends ChangeNotifier {
-//   WidgetRecorderController() : _containerKey = GlobalKey();
+  /// RepaintBoundary key
+  final GlobalKey _containerKey;
 
-//   /// key of the content widget to render
-//   final GlobalKey _containerKey;
+  /// Timer for FPS control
+  Timer? _timer;
 
-//   /// frame callback
-//   final SchedulerBinding _binding = SchedulerBinding.instance!;
+  /// Recording state
+  bool _isRecording = false;
 
-//   /// save frames
-//   final List<ui.Image> _frames = [];
+  /// Frame index
+  int _frameIndex = 0;
 
-//   /// start render
-//   void start(
-//       {required ControlNotifier controlNotifier,
-//       required RenderingNotifier renderingNotifier}) {
-//     controlNotifier.isRenderingWidget = true;
-//     renderingNotifier.renderState = RenderState.preparing;
-//     _binding.addPostFrameCallback(
-//       (timeStamp) {
-//         _postFrameCallback(timeStamp, controlNotifier, renderingNotifier);
-//       },
-//     );
-//     notifyListeners();
-//   }
+  /// Frames directory
+  late Directory _framesDir;
 
-//   /// stop render
-//   void stop(
-//       {required ControlNotifier controlNotifier,
-//       required RenderingNotifier renderingNotifier}) {
-//     renderingNotifier.renderState = RenderState.preparing;
-//     controlNotifier.isRenderingWidget = false;
-//     notifyListeners();
-//   }
+  /// FPS
+  static const int fps = 30;
 
-//   /// add frame to list
-//   void _postFrameCallback(Duration timestamp, ControlNotifier controlNotifier,
-//       RenderingNotifier renderingNotifier) async {
-//     if (controlNotifier.isRenderingWidget == false) {
-//       return;
-//     } else {
-//       renderingNotifier.renderState = RenderState.frames;
-//       notifyListeners();
-//       try {
-//         final image = await _captureFrame();
-//         _frames.add(image!);
-//         renderingNotifier.totalFrames = _frames.length;
-//         notifyListeners();
-//       } catch (e) {
-//         debugPrint(e.toString());
-//       }
-//       _binding.addPostFrameCallback(
-//         (timeStamp) {
-//           _postFrameCallback(timeStamp, controlNotifier, renderingNotifier);
-//         },
-//       );
-//       notifyListeners();
-//     }
-//   }
+  GlobalKey get key => _containerKey;
 
-//   /// capture widget to render
-//   Future<ui.Image?> _captureFrame() async {
-//     final renderObject = _containerKey.currentContext?.findRenderObject();
-//     notifyListeners();
-//     if (renderObject is RenderRepaintBoundary) {
-//       final image = await renderObject.toImage(pixelRatio: 2);
-//       return image;
-//     } else {
-//       FlutterError.reportError(_noRenderObject());
-//     }
-//     return null;
-//   }
+  /// START RECORDING
+  Future<void> start({
+    required ControlNotifier controlNotifier,
+    required RenderingNotifier renderingNotifier,
+  }) async {
+    if (_isRecording) return;
 
-//   /// error details
-//   FlutterErrorDetails _noRenderObject() {
-//     return FlutterErrorDetails(
-//       exception: Exception(
-//         '_containerKey.currentContext is null. '
-//         'Thus we can\'t create a screenshot',
-//       ),
-//       library: 'feedback',
-//       context: ErrorDescription(
-//         'Tried to find a context to use it to create a screenshot',
-//       ),
-//     );
-//   }
+    _isRecording = true;
+    _frameIndex = 0;
 
-//   /// export widget
-//   Future<Map<String, dynamic>> export(
-//       {required ControlNotifier controlNotifier,
-//       required RenderingNotifier renderingNotifier}) async {
-//     /// paths
-//     String dir;
-//     String imagePath;
+    controlNotifier.isRenderingWidget = true;
+    renderingNotifier.renderState = RenderState.frames;
 
-//     /// get application temp directory
-//     Directory appDocDirectory = await getTemporaryDirectory();
-//     dir = appDocDirectory.path;
+    final tempDir = await getTemporaryDirectory();
+    _framesDir = Directory('${tempDir.path}/widget_frames');
 
-//     /// delete last directory
-//     appDocDirectory.deleteSync(recursive: true);
+    if (_framesDir.existsSync()) {
+      _framesDir.deleteSync(recursive: true);
+    }
+    _framesDir.createSync(recursive: true);
 
-//     /// create new directory
-//     appDocDirectory.create();
-//     renderingNotifier.renderState = RenderState.preparing;
-//     notifyListeners();
+    _timer = Timer.periodic(
+      Duration(milliseconds: (1000 / fps).round()),
+      (_) => _captureFrame(renderingNotifier),
+    );
+  }
 
-//     /// iterate all frames
-//     for (int i = 0; i < _frames.length; i++) {
-//       /// convert frame to byte data png
-//       final val = await _frames[i].toByteData(format: ui.ImageByteFormat.png);
+  /// STOP RECORDING
+  void stop({
+    required ControlNotifier controlNotifier,
+    required RenderingNotifier renderingNotifier,
+  }) {
+    _timer?.cancel();
+    _isRecording = false;
 
-//       /// convert frame to buffer list
-//       Uint8List pngBytes = val!.buffer.asUint8List();
+    controlNotifier.isRenderingWidget = false;
+    renderingNotifier.renderState = RenderState.preparing;
+  }
 
-//       /// create temp path for every frame
-//       imagePath = '$dir/$i.png';
+  /// CAPTURE FRAME
+  Future<void> _captureFrame(RenderingNotifier renderingNotifier) async {
+    if (!_isRecording) return;
 
-//       /// create image frame in the temp directory
-//       File capturedFile = File(imagePath);
-//       await capturedFile.writeAsBytes(pngBytes);
-//       renderingNotifier.currentFrames = i;
-//     }
+    final context = _containerKey.currentContext;
+    if (context == null) return;
 
-//     /// clear frame list
-//     _frames.clear();
-//     renderingNotifier.renderState = RenderState.rendering;
-//     notifyListeners();
+    final renderObject = context.findRenderObject();
+    if (renderObject is! RenderRepaintBoundary) return;
 
-//     /// render frames.png to video/gif
-//     var response = await FfmpegProvider()
-//         .mergeIntoVideo(renderType: renderingNotifier.renderType);
+    if (renderObject.debugNeedsPaint) return;
 
-//     /// return
-//     return response;
-//   }
-// }
+    try {
+      final ui.Image image = await renderObject.toImage(pixelRatio: 2);
+      final ByteData? byteData =
+          await image.toByteData(format: ui.ImageByteFormat.png);
 
-// class ScreenRecorder extends StatelessWidget {
-//   const ScreenRecorder({
-//     Key? key,
-//     required this.child,
-//     required this.controller,
-//   }) : super(key: key);
+      if (byteData == null) return;
 
-//   /// The child which should be recorded.
-//   final Widget child;
+      final Uint8List bytes = byteData.buffer.asUint8List();
 
-//   /// This controller starts and stops the recording.
-//   final WidgetRecorderController controller;
+      final file = File(
+        '${_framesDir.path}/${_frameIndex.toString().padLeft(5, '0')}.png',
+      );
 
-//   @override
-//   Widget build(BuildContext context) {
-//     return RepaintBoundary(
-//       key: controller._containerKey,
-//       child: child,
-//     );
-//   }
-// }
+      await file.writeAsBytes(bytes);
+      _frameIndex++;
+
+      renderingNotifier.totalFrames = _frameIndex;
+    } catch (e) {
+      debugPrint('Frame capture error: $e');
+    }
+  }
+
+  /// EXPORT VIDEO / GIF
+  Future<Map<String, dynamic>> export({
+    required RenderingNotifier renderingNotifier,
+  }) async {
+    renderingNotifier.renderState = RenderState.rendering;
+
+    final response = await FfmpegProvider().mergeIntoVideo(
+      renderType: renderingNotifier.renderType,
+      inputDir: _framesDir.path,
+      fps: fps,
+    );
+
+    return response;
+  }
+}
+
+class ScreenRecorder extends StatelessWidget {
+  const ScreenRecorder({
+    super.key,
+    required this.child,
+    required this.controller,
+  });
+
+  final Widget child;
+  final WidgetRecorderController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return RepaintBoundary(
+      key: controller.key,
+      child: child,
+    );
+  }
+}

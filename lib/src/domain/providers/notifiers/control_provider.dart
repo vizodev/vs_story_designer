@@ -156,6 +156,4 @@ class ControlNotifier extends ChangeNotifier {
     _enableTextShadow = filter;
     notifyListeners();
   }
-
-  ////
 }

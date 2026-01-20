@@ -27,7 +27,7 @@ class ToolButton extends StatelessWidget {
         onTap: onTap,
         onLongPress: onLongPress,
         child: Padding(
-          padding: padding ?? const EdgeInsets.symmetric(horizontal: 10),
+          padding: padding ?? EdgeInsets.zero,
           child: Material(
             color: Colors.transparent,
             borderRadius: BorderRadius.circular(90),

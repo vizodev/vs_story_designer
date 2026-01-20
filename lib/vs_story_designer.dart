@@ -8,6 +8,7 @@ import 'package:vs_story_designer/src/domain/providers/notifiers/control_provide
 import 'package:vs_story_designer/src/domain/providers/notifiers/draggable_widget_notifier.dart';
 import 'package:vs_story_designer/src/domain/providers/notifiers/gradient_notifier.dart';
 import 'package:vs_story_designer/src/domain/providers/notifiers/painting_notifier.dart';
+import 'package:vs_story_designer/src/domain/providers/notifiers/rendering_notifier.dart';
 // import 'package:vs_story_designer/src/domain/providers/notifiers/rendering_notifier.dart';
 import 'package:vs_story_designer/src/domain/providers/notifiers/scroll_notifier.dart';
 import 'package:vs_story_designer/src/domain/providers/notifiers/text_editing_notifier.dart';
@@ -207,7 +208,7 @@ class _VSStoryDesignerState extends State<VSStoryDesigner> {
         ChangeNotifierProvider(create: (_) => GradientNotifier()),
         ChangeNotifierProvider(create: (_) => PaintingNotifier()),
         ChangeNotifierProvider(create: (_) => TextEditingNotifier()),
-        // ChangeNotifierProvider(create: (_) => RenderingNotifier()),
+        ChangeNotifierProvider(create: (_) => RenderingNotifier()),
       ],
       child: MainView(
         themeType: widget.themeType ?? ThemeType.dark,

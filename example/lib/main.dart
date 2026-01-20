@@ -1,13 +1,13 @@
 import 'dart:io';
 import 'dart:math';
-import 'package:path_provider/path_provider.dart';
-import 'package:flutter/rendering.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'dart:ui' as ui;
 
+import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:vs_story_designer/vs_story_designer.dart';
-import 'dart:ui' as ui;
 
 void main() {
   runApp(const MyApp());
@@ -68,15 +68,8 @@ class _ExampleState extends State<Example> {
                         context,
                         MaterialPageRoute(
                             builder: (context) => VSStoryDesigner(
-                                  centerText: "Start Creating Your Story",
-                                  // fontFamilyList: const [
-                                  //   FontType.abrilFatface,
-                                  //   FontType.alegreya,
-                                  //   FontType.typewriter
-                                  // ],
-                                  // middleBottomWidget: const SizedBox(),
-                                  themeType: ThemeType
-                                      .light, // OPTIONAL, Default ThemeType.dark
+                                  centerText: "Start Creating Your Clip",
+                                  themeType: ThemeType.dark,
                                   galleryThumbnailQuality: 250,
                                   onDone: (uri) {
                                     debugPrint(uri);
