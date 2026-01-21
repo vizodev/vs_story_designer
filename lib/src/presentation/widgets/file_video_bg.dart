@@ -2,7 +2,9 @@ import 'dart:io';
 
 import 'package:chewie/chewie.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:video_player/video_player.dart';
+import 'package:vs_story_designer/src/domain/providers/notifiers/control_provider.dart';
 
 class FileVideoBg extends StatefulWidget {
   final String path;
@@ -27,6 +29,10 @@ class _FileVideoBgState extends State<FileVideoBg> {
 
   Future<void> _initializePlayer() async {
     await _videoController.initialize();
+
+    final controlNotifier = context.read<ControlNotifier>();
+
+    controlNotifier.videoDuration = _videoController.value.duration;
 
     _chewieController = ChewieController(
       videoPlayerController: _videoController,

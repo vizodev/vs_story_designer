@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:vs_story_designer/src/presentation/utils/constants/colors.dart';
 import 'package:vs_story_designer/src/presentation/utils/constants/font_family.dart';
@@ -32,17 +30,17 @@ class ControlNotifier extends ChangeNotifier {
 
   String _folderName = "";
 
-  int _gradientIndex = Random().nextInt(50);
+  // int _gradientIndex = Random().nextInt(50);
 
-  /// current gradient index
-  int get gradientIndex => _gradientIndex;
+  // /// current gradient index
+  // int get gradientIndex => _gradientIndex;
 
-  /// get current gradient index
-  set gradientIndex(int index) {
-    /// set new current gradient index
-    _gradientIndex = index;
-    notifyListeners();
-  }
+  // /// get current gradient index
+  // set gradientIndex(int index) {
+  //   /// set new current gradient index
+  //   _gradientIndex = index;
+  //   notifyListeners();
+  // }
 
   bool _isTextEditing = false;
 
@@ -154,6 +152,15 @@ class ControlNotifier extends ChangeNotifier {
   bool get enableTextShadow => _enableTextShadow;
   set enableTextShadow(bool filter) {
     _enableTextShadow = filter;
+    notifyListeners();
+  }
+
+  Duration? _videoDuration;
+
+  Duration? get videoDuration => _videoDuration;
+
+  set videoDuration(Duration? duration) {
+    _videoDuration = duration;
     notifyListeners();
   }
 }

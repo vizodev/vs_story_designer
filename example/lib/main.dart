@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:share_plus/share_plus.dart';
 import 'package:vs_story_designer/vs_story_designer.dart';
 
 void main() {
@@ -73,8 +72,6 @@ class _ExampleState extends State<Example> {
                                   galleryThumbnailQuality: 250,
                                   onDone: (uri) {
                                     debugPrint(uri);
-                                    SharePlus.instance.share(ShareParams(
-                                        files: [XFile(File(uri).path)]));
                                   },
                                   mediaPath: mediaPath,
                                 )));

@@ -18,6 +18,7 @@ import 'package:vs_story_designer/src/presentation/utils/constants/item_type.dar
 import 'package:vs_story_designer/src/presentation/widgets/animated_onTap_button.dart';
 import 'package:vs_story_designer/src/presentation/widgets/file_gif_bg.dart';
 import 'package:vs_story_designer/src/presentation/widgets/file_image_bg.dart';
+import 'package:vs_story_designer/src/presentation/widgets/file_video_bg.dart';
 
 class DraggableWidget extends StatelessWidget {
   final EditableItem draggableWidget;
@@ -98,15 +99,12 @@ class DraggableWidget extends StatelessWidget {
       /// image [file_image_gb.dart]
       case ItemType.image:
         if (_controlProvider.mediaPath.isNotEmpty) {
-          overlayWidget = SizedBox(
-            // width: _size.width - 72,
-            child: FileImageBG(
-              filePath: File(_controlProvider.mediaPath),
-              generatedGradient: (color1, color2) {
-                _colorProvider.color1 = color1;
-                _colorProvider.color2 = color2;
-              },
-            ),
+          overlayWidget = FileImageBG(
+            filePath: File(_controlProvider.mediaPath),
+            generatedGradient: (color1, color2) {
+              // _colorProvider.color1 = color1;
+              // _colorProvider.color2 = color2;
+            },
           );
         } else {
           overlayWidget = Container();
@@ -115,20 +113,15 @@ class DraggableWidget extends StatelessWidget {
         break;
 
       case ItemType.gif:
-        overlayWidget = SizedBox(
-          width: 150,
-          height: 150,
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(10),
-            child: FileGifBg(
-              path: _controlProvider.mediaPath,
-            ),
-          ),
+        overlayWidget = FileGifBg(
+          path: _controlProvider.mediaPath,
         );
         break;
 
       case ItemType.video:
-        overlayWidget = const Center();
+        overlayWidget = FileVideoBg(
+          path: _controlProvider.mediaPath,
+        );
     }
 
     /// set widget data position on main screen
