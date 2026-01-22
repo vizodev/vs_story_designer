@@ -17,7 +17,7 @@ dependencies:
   path_provider: ^2.1.5
   photo_view: ^0.15.0
   google_fonts: ^6.2.1
-  image_gallery_saver_plus: ^4.0.1
+
   
   vs_media_picker: ^1.0.4
   
@@ -35,8 +35,8 @@ dependencies:
   video_player: ^2.10.1
   chewie: ^1.13.0
   permission_handler: ^11.3.1
-  image_gallery_saver2: ^2.0.5
   ffmpeg_kit_flutter_new: ^3.1.0
+  vision_gallery_saver: ^3.1.1
 
 dev_dependencies:
   flutter_test:

@@ -7,11 +7,11 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:image_gallery_saver2/image_gallery_saver.dart';
 // import 'package:fluttertoast/fluttertoast.dart';
 // import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:provider/provider.dart';
+import 'package:vision_gallery_saver/vision_gallery_saver.dart';
 import 'package:vs_story_designer/src/domain/models/editable_items.dart';
 import 'package:vs_story_designer/src/domain/models/painting_model.dart';
 import 'package:vs_story_designer/src/domain/providers/notifiers/control_provider.dart';
@@ -181,7 +181,7 @@ class _MainViewState extends State<MainView> {
       },
       child: Material(
         color: widget.editorBackgroundColor == Colors.transparent
-            ? Colors.transparent
+            ? Colors.black
             : widget.editorBackgroundColor ?? Colors.transparent,
         child: Consumer6<
             ControlNotifier,
@@ -551,7 +551,7 @@ class _MainViewState extends State<MainView> {
             setState(() {
               renderingNotifier.renderState = RenderState.saving;
             });
-            await ImageGallerySaver.saveFile(path['outPath'],
+            await VisionGallerySaver.saveFile(path['outPath'],
                     name: "${DateTime.now()}")
                 .then((value) {
               if (value['isSuccess']) {

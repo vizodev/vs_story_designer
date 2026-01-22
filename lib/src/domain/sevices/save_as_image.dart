@@ -1,10 +1,11 @@
 import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:image_gallery_saver_plus/image_gallery_saver_plus.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:vision_gallery_saver/vision_gallery_saver.dart';
 
 Future takePicture(
     {required contentKey,
@@ -28,13 +29,9 @@ Future takePicture(
     await capturedFile.writeAsBytes(pngBytes);
 
     if (saveToGallery) {
-      final result = await ImageGallerySaverPlus.saveImage(pngBytes,
+      final result = await VisionGallerySaver.saveImage(pngBytes,
           quality: 100, name: "${fileName}_${DateTime.now()}.png");
-      if (result != null) {
-        return true;
-      } else {
-        return false;
-      }
+      return true;
     } else {
       return imagePath;
     }

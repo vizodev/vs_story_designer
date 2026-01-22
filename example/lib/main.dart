@@ -13,23 +13,21 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Flutter story designer Demo',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
+      theme: ThemeData(primarySwatch: Colors.blue),
       home: const Example(),
     );
   }
 }
 
 class Example extends StatefulWidget {
-  const Example({Key? key}) : super(key: key);
+  const Example({super.key});
 
   @override
   State<Example> createState() => _ExampleState();
@@ -39,57 +37,64 @@ class _ExampleState extends State<Example> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: Colors.white,
-        resizeToAvoidBottomInset: false,
-        body: RepaintBoundary(
-          key: _globalKey,
-          child: Container(
-            color: Colors.white,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Text(
-                  'Welcome To Story Designer',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 35, fontWeight: FontWeight.bold),
+      backgroundColor: Colors.white,
+      resizeToAvoidBottomInset: false,
+      body: RepaintBoundary(
+        key: _globalKey,
+        child: Container(
+          color: Colors.white,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Text(
+                'Welcome To Story Designer',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 35, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 10),
+              const Text(
+                'All New Way To Explore Story Designer',
+                style: TextStyle(fontSize: 18),
+              ),
+              const SizedBox(height: 50),
+              ElevatedButton(
+                onPressed: () async {
+                  String? mediaPath = await _prepareImage();
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => VSStoryDesigner(
+                        centerText: "Start Creating Your Clip",
+                        themeType: ThemeType.dark,
+                        galleryThumbnailQuality: 250,
+                        onDone: (uri) {
+                          debugPrint(uri);
+                        },
+                        mediaPath: mediaPath,
+                      ),
+                    ),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 10,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
                 ),
-                const SizedBox(height: 10),
-                const Text(
-                  'All New Way To Explore Story Designer',
-                  style: TextStyle(fontSize: 18),
+                child: const Text(
+                  'Create',
+                  style: TextStyle(fontSize: 30, fontWeight: FontWeight.w500),
                 ),
-                const SizedBox(height: 50),
-                ElevatedButton(
-                  onPressed: () async {
-                    String? mediaPath = await _prepareImage();
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => VSStoryDesigner(
-                                  centerText: "Start Creating Your Clip",
-                                  themeType: ThemeType.dark,
-                                  galleryThumbnailQuality: 250,
-                                  onDone: (uri) {
-                                    debugPrint(uri);
-                                  },
-                                  mediaPath: mediaPath,
-                                )));
-                  },
-                  child: const Text('Create',
-                      style:
-                          TextStyle(fontSize: 30, fontWeight: FontWeight.w500)),
-                  style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 20, vertical: 10),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      )),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
-        ));
+        ),
+      ),
+    );
   }
 
   final GlobalKey _globalKey = GlobalKey();
@@ -98,8 +103,9 @@ class _ExampleState extends State<Example> {
     ByteData? byteData;
 
     try {
-      RenderRepaintBoundary? boundary = _globalKey.currentContext
-          ?.findRenderObject() as RenderRepaintBoundary?;
+      RenderRepaintBoundary? boundary =
+          _globalKey.currentContext?.findRenderObject()
+              as RenderRepaintBoundary?;
 
       ui.Image? image = await boundary?.toImage(pixelRatio: 4);
       byteData = await image?.toByteData(format: ui.ImageByteFormat.png);
