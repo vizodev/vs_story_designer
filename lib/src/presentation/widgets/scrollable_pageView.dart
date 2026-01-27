@@ -36,26 +36,32 @@ class _ScrollablePageViewState extends State<ScrollablePageView> {
 
   @override
   void dispose() {
-    _pageController!.dispose();
-    _listScrollController!.dispose();
+    _drag?.cancel();
     super.dispose();
   }
 
   void _handleDragStart(DragStartDetails details) {
-    if (_listScrollController!.hasClients) {
-      final RenderBox renderBox = _listScrollController!
-          .position.context.storageContext
-          .findRenderObject() as RenderBox;
-      if (renderBox.paintBounds
-          .shift(renderBox.localToGlobal(Offset.zero))
-          .contains(details.globalPosition)) {
-        _activeScrollController = _listScrollController;
-        _drag = _activeScrollController!.position.drag(details, _disposeDrag);
-        return;
+    if (_listScrollController!.hasClients &&
+        _listScrollController!.position.hasContentDimensions) {
+      final context = _listScrollController!.position.context.storageContext;
+      final renderObject = context.findRenderObject();
+
+      if (renderObject is RenderBox) {
+        final bounds = renderObject.paintBounds
+            .shift(renderObject.localToGlobal(Offset.zero));
+
+        if (bounds.contains(details.globalPosition)) {
+          _activeScrollController = _listScrollController;
+          _drag = _activeScrollController!.position.drag(details, _disposeDrag);
+          return;
+        }
       }
     }
-    _activeScrollController = _pageController;
-    _drag = _pageController!.position.drag(details, _disposeDrag);
+
+    if (_pageController!.hasClients) {
+      _activeScrollController = _pageController;
+      _drag = _pageController!.position.drag(details, _disposeDrag);
+    }
   }
 
   void _handleDragUpdate(DragUpdateDetails details) {

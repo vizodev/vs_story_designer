@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
@@ -14,27 +13,16 @@ import 'package:vs_story_designer/src/presentation/utils/constants/render_state.
 class WidgetRecorderController extends ChangeNotifier {
   WidgetRecorderController() : _containerKey = GlobalKey();
 
-  /// RepaintBoundary key
   final GlobalKey _containerKey;
-
-  /// Timer for FPS control
   Timer? _timer;
-
-  /// Recording state
   bool _isRecording = false;
-
-  /// Frame index
   int _frameIndex = 0;
-
-  /// Frames directory
   late Directory _framesDir;
 
-  /// FPS
   static const int fps = 30;
 
   GlobalKey get key => _containerKey;
 
-  /// START RECORDING
   Future<void> start({
     required ControlNotifier controlNotifier,
     required RenderingNotifier renderingNotifier,
@@ -51,9 +39,9 @@ class WidgetRecorderController extends ChangeNotifier {
     _framesDir = Directory('${tempDir.path}/widget_frames');
 
     if (_framesDir.existsSync()) {
-      _framesDir.deleteSync(recursive: true);
+      await _framesDir.delete(recursive: true);
     }
-    _framesDir.createSync(recursive: true);
+    await _framesDir.create(recursive: true);
 
     _timer = Timer.periodic(
       Duration(milliseconds: (1000 / fps).round()),
@@ -61,7 +49,6 @@ class WidgetRecorderController extends ChangeNotifier {
     );
   }
 
-  /// STOP RECORDING
   void stop({
     required ControlNotifier controlNotifier,
     required RenderingNotifier renderingNotifier,
@@ -73,45 +60,52 @@ class WidgetRecorderController extends ChangeNotifier {
     renderingNotifier.renderState = RenderState.preparing;
   }
 
-  /// CAPTURE FRAME
   Future<void> _captureFrame(RenderingNotifier renderingNotifier) async {
     if (!_isRecording) return;
 
-    final context = _containerKey.currentContext;
-    if (context == null) return;
-
-    final renderObject = context.findRenderObject();
-    if (renderObject is! RenderRepaintBoundary) return;
-
-    if (renderObject.debugNeedsPaint) return;
-
     try {
-      final ui.Image image = await renderObject.toImage(pixelRatio: 2);
-      final ByteData? byteData =
-          await image.toByteData(format: ui.ImageByteFormat.png);
+      await Future.delayed(Duration.zero);
 
+      final context = _containerKey.currentContext;
+      if (context == null) return;
+
+      final boundary = context.findRenderObject() as RenderRepaintBoundary?;
+
+      if (boundary == null) return;
+
+      final image = await boundary.toImage(pixelRatio: 1);
+      final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
       if (byteData == null) return;
-
-      final Uint8List bytes = byteData.buffer.asUint8List();
 
       final file = File(
         '${_framesDir.path}/${_frameIndex.toString().padLeft(5, '0')}.png',
       );
 
-      await file.writeAsBytes(bytes);
-      _frameIndex++;
+      await file.writeAsBytes(byteData.buffer.asUint8List());
 
+      _frameIndex++;
       renderingNotifier.totalFrames = _frameIndex;
     } catch (e) {
       debugPrint('Frame capture error: $e');
     }
   }
 
-  /// EXPORT VIDEO / GIF
   Future<Map<String, dynamic>> export({
     required RenderingNotifier renderingNotifier,
   }) async {
     renderingNotifier.renderState = RenderState.rendering;
+
+    final files =
+        _framesDir.listSync().whereType<File>().toList(growable: false);
+
+    debugPrint('Total frames found: ${files.length}');
+
+    if (files.length < 2) {
+      return {
+        'success': false,
+        'msg': 'Not enough frames to render video.',
+      };
+    }
 
     final response = await FfmpegProvider().mergeIntoVideo(
       renderType: renderingNotifier.renderType,

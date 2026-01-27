@@ -22,6 +22,7 @@ dependencies:
 
   vs_story_designer:
     path: ../
+  bot_toast: ^4.1.3
 
 dev_dependencies:
   flutter_test:

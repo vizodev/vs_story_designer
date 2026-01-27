@@ -3,6 +3,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:bot_toast/bot_toast.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -230,126 +231,119 @@ class _MainViewState extends State<MainView> {
                                       : (_screenSize.size.height),
                                   child: ScreenRecorder(
                                     controller: _recorderController,
-                                    child: RepaintBoundary(
-                                      key: contentKey,
-                                      child: AnimatedContainer(
-                                        duration:
-                                            const Duration(milliseconds: 200),
-                                        // decoration: BoxDecoration(
-                                        //     //borderRadius: BorderRadius.circular(25),
-                                        //     gradient: controlNotifier
-                                        //             .mediaPath.isEmpty
-                                        //         ? LinearGradient(
-                                        //             colors: controlNotifier
-                                        //                     .gradientColors![
-                                        //                 controlNotifier
-                                        //                     .gradientIndex],
-                                        //             begin: Alignment.topLeft,
-                                        //             end:
-                                        //                 Alignment.bottomRight,
-                                        //           )
-                                        //         : LinearGradient(
-                                        //             colors: [
-                                        //               colorProvider.color1,
-                                        //               colorProvider.color2
-                                        //             ],
-                                        //             begin:
-                                        //                 Alignment.topCenter,
-                                        //             end: Alignment
-                                        //                 .bottomCenter,
-                                        //           )),
-                                        child: GestureDetector(
-                                          onScaleStart: _onScaleStart,
-                                          onScaleUpdate: _onScaleUpdate,
-                                          child: Stack(
-                                            alignment: Alignment.center,
-                                            children: [
-                                              /// in this case photo view works as a main background container to manage
-                                              /// the gestures of all movable items.
-                                              PhotoView.customChild(
-                                                backgroundDecoration:
-                                                    const BoxDecoration(
-                                                        color:
-                                                            Colors.transparent),
-                                                child: Container(),
-                                              ),
+                                    child: AnimatedContainer(
+                                      duration:
+                                          const Duration(milliseconds: 200),
+                                      // decoration: BoxDecoration(
+                                      //     //borderRadius: BorderRadius.circular(25),
+                                      //     gradient: controlNotifier
+                                      //             .mediaPath.isEmpty
+                                      //         ? LinearGradient(
+                                      //             colors: controlNotifier
+                                      //                     .gradientColors![
+                                      //                 controlNotifier
+                                      //                     .gradientIndex],
+                                      //             begin: Alignment.topLeft,
+                                      //             end:
+                                      //                 Alignment.bottomRight,
+                                      //           )
+                                      //         : LinearGradient(
+                                      //             colors: [
+                                      //               colorProvider.color1,
+                                      //               colorProvider.color2
+                                      //             ],
+                                      //             begin:
+                                      //                 Alignment.topCenter,
+                                      //             end: Alignment
+                                      //                 .bottomCenter,
+                                      //           )),
+                                      child: GestureDetector(
+                                        onScaleStart: _onScaleStart,
+                                        onScaleUpdate: _onScaleUpdate,
+                                        child: Stack(
+                                          alignment: Alignment.center,
+                                          children: [
+                                            /// in this case photo view works as a main background container to manage
+                                            /// the gestures of all movable items.
+                                            PhotoView.customChild(
+                                              backgroundDecoration:
+                                                  const BoxDecoration(
+                                                      color:
+                                                          Colors.transparent),
+                                              child: Container(),
+                                            ),
 
-                                              ///list items
-                                              ...itemProvider.draggableWidget
-                                                  .map((editableItem) =>
-                                                      DraggableWidget(
-                                                        context: context,
-                                                        draggableWidget:
-                                                            editableItem,
-                                                        onPointerDown:
-                                                            (details) {
-                                                          _updateItemPosition(
-                                                            editableItem,
-                                                            details,
-                                                          );
-                                                        },
-                                                        onPointerUp: (details) {
-                                                          _deleteItemOnCoordinates(
-                                                            editableItem,
-                                                            details,
-                                                          );
-                                                        },
-                                                        onPointerMove:
-                                                            (details) {
-                                                          _deletePosition(
-                                                            editableItem,
-                                                            details,
-                                                          );
-                                                        },
-                                                      )),
+                                            ///list items
+                                            ...itemProvider.draggableWidget.map(
+                                                (editableItem) =>
+                                                    DraggableWidget(
+                                                      context: context,
+                                                      draggableWidget:
+                                                          editableItem,
+                                                      onPointerDown: (details) {
+                                                        _updateItemPosition(
+                                                          editableItem,
+                                                          details,
+                                                        );
+                                                      },
+                                                      onPointerUp: (details) {
+                                                        _deleteItemOnCoordinates(
+                                                          editableItem,
+                                                          details,
+                                                        );
+                                                      },
+                                                      onPointerMove: (details) {
+                                                        _deletePosition(
+                                                          editableItem,
+                                                          details,
+                                                        );
+                                                      },
+                                                    )),
 
-                                              /// finger paint
-                                              IgnorePointer(
-                                                ignoring: true,
-                                                child: Align(
-                                                  alignment:
-                                                      Alignment.topCenter,
-                                                  child: Container(
-                                                    decoration: BoxDecoration(
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              25),
-                                                    ),
-                                                    child: RepaintBoundary(
-                                                      child: SizedBox(
-                                                        width: MediaQuery.of(
-                                                                context)
-                                                            .size
-                                                            .width,
-                                                        height: MediaQuery.of(
-                                                                    context)
-                                                                .size
-                                                                .height -
-                                                            132,
-                                                        child: StreamBuilder<
-                                                            List<
-                                                                PaintingModel>>(
-                                                          stream: paintingProvider
-                                                              .linesStreamController
-                                                              .stream,
-                                                          builder: (context,
-                                                              snapshot) {
-                                                            return CustomPaint(
-                                                              painter: Sketcher(
-                                                                lines:
-                                                                    paintingProvider
-                                                                        .lines,
-                                                              ),
-                                                            );
-                                                          },
-                                                        ),
+                                            /// finger paint
+                                            IgnorePointer(
+                                              ignoring: true,
+                                              child: Align(
+                                                alignment: Alignment.topCenter,
+                                                child: Container(
+                                                  decoration: BoxDecoration(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            25),
+                                                  ),
+                                                  child: RepaintBoundary(
+                                                    child: SizedBox(
+                                                      width:
+                                                          MediaQuery.of(context)
+                                                              .size
+                                                              .width,
+                                                      height:
+                                                          MediaQuery.of(context)
+                                                                  .size
+                                                                  .height -
+                                                              132,
+                                                      child: StreamBuilder<
+                                                          List<PaintingModel>>(
+                                                        stream: paintingProvider
+                                                            .linesStreamController
+                                                            .stream,
+                                                        builder: (context,
+                                                            snapshot) {
+                                                          return CustomPaint(
+                                                            painter: Sketcher(
+                                                              lines:
+                                                                  paintingProvider
+                                                                      .lines,
+                                                            ),
+                                                          );
+                                                        },
                                                       ),
                                                     ),
                                                   ),
                                                 ),
                                               ),
-                                            ],
-                                          ),
+                                            ),
+                                          ],
                                         ),
                                       ),
                                     ),
@@ -526,66 +520,107 @@ class _MainViewState extends State<MainView> {
     );
   }
 
+  void _showIconToast(IconData icon, Color color) {
+    BotToast.closeAllLoading();
+
+    BotToast.showCustomNotification(
+      toastBuilder: (_) => Center(
+        child: Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: Colors.black.withValues(alpha: 0.85),
+            borderRadius: BorderRadius.circular(22),
+            boxShadow: const [
+              BoxShadow(
+                color: Colors.black26,
+                blurRadius: 16,
+                spreadRadius: 2,
+              )
+            ],
+          ),
+          child: Icon(icon, color: color, size: 42),
+        ),
+      ),
+      duration: const Duration(milliseconds: 900),
+      onlyOne: true,
+      crossPage: false,
+    );
+  }
+
   // recording and save mp4 widget
-  void startRecording(
-      {required ControlNotifier controlNotifier,
-      required RenderingNotifier renderingNotifier,
-      required bool saveOnGallery}) {
-    final Duration videoDuration =
+  void startRecording({
+    required ControlNotifier controlNotifier,
+    required RenderingNotifier renderingNotifier,
+    required bool saveOnGallery,
+  }) async {
+    final videoDuration =
         controlNotifier.videoDuration ?? const Duration(seconds: 3);
-    _recorderController.start(
-        controlNotifier: controlNotifier, renderingNotifier: renderingNotifier);
-    Timer.periodic(videoDuration, (timer) async {
-      if (renderingNotifier.recordingDuration == 0) {
-        setState(() {
-          _recorderController.stop(
-              controlNotifier: controlNotifier,
-              renderingNotifier: renderingNotifier);
-          timer.cancel();
-        });
-        var path = await _recorderController.export(
-            // controlNotifier: controlNotifier,
-            renderingNotifier: renderingNotifier);
-        if (path['success']) {
-          if (saveOnGallery) {
-            setState(() {
-              renderingNotifier.renderState = RenderState.saving;
-            });
-            await VisionGallerySaver.saveFile(path['outPath'],
-                    name: "${DateTime.now()}")
-                .then((value) {
-              if (value['isSuccess']) {
-                debugPrint(value['filePath']);
-                Fluttertoast.showToast(msg: 'Recording successfully saved');
-              } else {
-                debugPrint('Gallery saver error: ${value['errorMessage']}');
-                Fluttertoast.showToast(msg: 'Gallery saver error');
-              }
-            }).whenComplete(() {
-              setState(() {
-                controlNotifier.isRenderingWidget = false;
-                renderingNotifier.renderState = RenderState.none;
-                renderingNotifier.recordingDuration = 3;
-              });
-            });
-          } else {
-            setState(() {
-              controlNotifier.isRenderingWidget = false;
-              renderingNotifier.renderState = RenderState.none;
-              renderingNotifier.recordingDuration = 3;
-              widget.onDone!(path['outPath']);
-            });
-          }
-        } else {
-          setState(() {
-            renderingNotifier.renderState = RenderState.none;
-            Fluttertoast.showToast(msg: 'Something was wrong.');
-          });
+
+    renderingNotifier.recordingDuration = videoDuration.inSeconds;
+    controlNotifier.isRenderingWidget = true;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _recorderController.start(
+        controlNotifier: controlNotifier,
+        renderingNotifier: renderingNotifier,
+      );
+    });
+
+    Timer.periodic(const Duration(seconds: 1), (timer) async {
+      if (!mounted) return timer.cancel();
+
+      if (renderingNotifier.recordingDuration <= 1) {
+        timer.cancel();
+
+        _recorderController.stop(
+          controlNotifier: controlNotifier,
+          renderingNotifier: renderingNotifier,
+        );
+
+        renderingNotifier.renderState = RenderState.rendering;
+
+        final path = await _recorderController.export(
+          renderingNotifier: renderingNotifier,
+        );
+
+        if (!(path['success'] ?? false)) {
+          renderingNotifier.renderState = RenderState.none;
+          controlNotifier.isRenderingWidget = false;
+          Fluttertoast.showToast(msg: 'Something went wrong.');
+          return;
         }
+
+        final outPath = path['outPath'];
+
+        renderingNotifier.renderState = RenderState.none;
+        controlNotifier.isRenderingWidget = false;
+        renderingNotifier.recordingDuration = videoDuration.inSeconds;
+
+        if (!saveOnGallery) {
+          _showIconToast(Icons.check_circle_rounded, Colors.greenAccent);
+
+          widget.onDone?.call(outPath);
+          return;
+        }
+
+        renderingNotifier.renderState = RenderState.saving;
+
+        unawaited(
+          VisionGallerySaver.saveFile(outPath, name: "${DateTime.now()}")
+              .then((value) {
+            if (value['isSuccess']) {
+              _showIconToast(Icons.download_rounded, Colors.lightBlueAccent);
+            } else {
+              _showIconToast(Icons.cancel_rounded, Colors.redAccent);
+            }
+          }).whenComplete(() {
+            if (mounted) {
+              renderingNotifier.renderState = RenderState.none;
+            }
+          }),
+        );
       } else {
-        setState(() {
-          renderingNotifier.recordingDuration--;
-        });
+        renderingNotifier.recordingDuration--;
       }
     });
   }
